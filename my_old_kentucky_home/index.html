@@ -15,8 +15,6 @@
 <div id="lyrics"></div>
 
 <script>
-	// Complete this section and create a CSS file named style.css
-
 
 	function updateText(){
 
@@ -27,7 +25,46 @@
 			document.getElementById("lyrics").innerHTML = "'Tis summer, the people are gay";
 		}	
 
-	} 
+		if(v.currentTime > 22.0){
+			document.getElementById("lyrics").innerHTML = "The corn-top's ripe and the meadow's in the bloom";
+		}	
+
+		if(v.currentTime > 28.0){
+			document.getElementById("lyrics").innerHTML = "While the birds make music all the day";
+		}	
+		if(v.currentTime > 35.0){
+			document.getElementById("lyrics").innerHTML = "The young folks roll on the little cabin floor,";
+		}	
+		if(v.currentTime > 42.0){
+			document.getElementById("lyrics").innerHTML = "All merry, all happy and bright";
+		}	
+		if(v.currentTime > 49.0){
+			document.getElementById("lyrics").innerHTML = "By 'n' by hard times comes a knocking at the door,";
+		}	
+
+		if(v.currentTime > 55.0){
+			document.getElementById("lyrics").innerHTML = "Then My Old Kentucky Home, good night!";
+		}	
+
+		if(v.currentTime > 64.0){
+			document.getElementById("lyrics").innerHTML = "Weep no more my lady";
+		}	
+
+		if(v.currentTime > 71.0){
+			document.getElementById("lyrics").innerHTML = "Oh weep no more today;";
+		}	
+
+		if(v.currentTime > 77.0){
+			document.getElementById("lyrics").innerHTML = "We will sing one song";
+		}	
+		if(v.currentTime > 80.0){
+			document.getElementById("lyrics").innerHTML = "For My Old Kentucky Home";
+		}	
+
+		if(v.currentTime > 83.0){
+			document.getElementById("lyrics").innerHTML = "For My Old Kentucky Home";
+		}	
+	}
 
 	var v = document.getElementsByTagName("video")[0];
 
