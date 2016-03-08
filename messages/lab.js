@@ -3,8 +3,6 @@ function parse(){
 	//First, make the request
  	var myRequest = new XMLHttpRequest();
  	myRequest.open("GET", "data.json", true);
-
- 	console.log("testI"); 
  	
  	//now, handle the request
  	myRequest.onreadystatechange = function (){
@@ -17,7 +15,7 @@ function parse(){
  			elem = document.getElementById("messages");
 
  		for(i=0; i<theData.length;  i++){
- 				result += "<p>"+ theData[i]["username"] + " " + theData[i]["message"] +"</p>"; 
+ 				result += "<p>"+ theData[i]["username"] + " " + theData[i]["content"] +"</p>"; 
 
  			}
  			elem.innerHTML = result; 
