@@ -8,7 +8,8 @@ function parse(){
  	myRequest.onreadystatechange = function (){
 
  		//data must be ready 
- 		if (myRequest.readyState == 4) {
+ 		if (myRequest.readyState == 4 && myRequest.status == 200) {
+ 			//check if the data is bad
  			result=""; 
  			raw = myRequest.responseText;
  			theData = JSON.parse(raw);
