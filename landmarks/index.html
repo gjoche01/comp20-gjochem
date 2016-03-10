@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <meta charset="utf-8">
+
+  <title>Assignemnt 2</title>
+
+  <!link rel="stylesheet" href="style.css"!>
+</head>
+
+<body onload="getLocation()">
+<div id="messages"> Test </div>
+
+<script>
+
+var myLat = 0;
+var myLng = 0;
+
+function getLocation(){
+	console.log("test!"); 
+
+	if (navigator.geolocation) { // the navigator.geolocation object is supported on your browser
+					//get location and pass it to a function? 
+					navigator.geolocation.getCurrentPosition(function(position) {
+						myLat = position.coords.latitude;
+						myLng = position.coords.longitude;
+						//for testing purposes output it
+						console.log(myLat); 
+						console.log(myLng);
+						sendLocation(); 
+					});
+				}
+				else {
+					alert("Geolocation is not supported by your web browser.  What a shame!");
+				}
+}
+
+
+function sendLocation(){
+
+	var myRequest = new XMLHttpRequest();
+	 	myRequest.open("Post", "https://defense-in-derpth.herokuapp.com/sendLocation", true);
+	 	myRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded"); 
+	 	//convention on assignment sheet
+
+		myRequest.onreadystatechange = function (){
+
+	 		//data must be ready 
+	 		if (myRequest.readyState == 4 && myRequest.status == 200) {
+	 			//check if the data is bad
+	 			result=""; 
+	 			raw = myRequest.responseText;
+	 			theData = JSON.parse(raw);
+	 			elem = document.getElementById("messages");
+
+	 		/*for(i=0; i<theData.length;  i++){
+	 				result += "<p>"+ theData[i] +"</p>"; 
+
+	 			}*/ 
+	 			elem.innerHTML = theData; 
+	 			console.log(theData); 
+	 		}
+	 	}
+
+	 	myRequest.send("login=ELMER_MADDEN&lat="+myLat+"&lng="+myLng); 
+
+	 	console.log("theoretically, you sent your location!"); 
+}
+
+
+</script>
+
+
+ 
+</body>
+
+</html>
