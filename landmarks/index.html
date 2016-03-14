@@ -34,7 +34,7 @@ function initMap(){
 
 
 function getLocation(){
-	console.log("test!"); 
+	//console.log("test!"); 
 
 	if (navigator.geolocation) { // the navigator.geolocation object is supported on your browser
 					//get location and pass it to a function? 
@@ -72,26 +72,26 @@ function sendLocation(){
 
 
 				for(i=0; i<theData.people.length; i++){
-					console.log("looping"); 
+					//console.log("looping"); 
 					login = theData.people[i].login; 
 					LatLng = {lat: theData.people[i].lat, lng: theData.people[i].lng};
 			
 
 					var m = makeMarker(login, LatLng); 
-					console.log(m);
+					//console.log(m);
 	 			}  
 
 
 				for(i=0; i<theData.landmarks.length; i++){
 					var LatLng2 = {lat: theData.landmarks[i].geometry.coordinates[1],
 						lng: theData.landmarks[i].geometry.coordinates[0]};
-					console.log(LatLng2); 
+					//console.log(LatLng2); 
 
 					var title= theData.landmarks[i].properties.Location_Name; 
-					console.log(title); 
+					//console.log(title); 
 
-					var m = makeMarker(title, LatLng2); 
-					console.log(m); 
+					var m = makeMarker(title, LatLng2, "landmark");  
+					//console.log(m); 
 
 					/*
 					marker = new google.maps.Marker({
@@ -125,7 +125,7 @@ function renderMap(){
 		me = new google.maps.LatLng(myLat, myLng);
 		map.panTo(me);
 
-		makeMarker("Here I Am!", me); 
+		makeMarker("Here I Am!", me, "me"); 
         /*marker = new google.maps.Marker({
 					position: me,
 					title: "Here I Am!"
@@ -141,21 +141,55 @@ function renderMap(){
 				sendLocation(); 
 }
 
-function makeMarker(title, LatLng){
+function makeMarker(title, LatLng, key){
+
+	var image; 
+	if (key == "me"){
+		image = "http://ruralshores.com/assets/marker-icon.png"; 
+	}
+	if (key == "landmark"){
+		image = "http://megaicons.net/static/img/icons_sizes/8/178/32/maps-and-geolocation-marker-icon.png"; 
+	}
+
 	var marker = new google.maps.Marker({
 			position: LatLng,
-			title: title
+			title: title, 
+			icon: image
 	});
-
 	marker.setMap(map);
 
 	google.maps.event.addListener(marker, 'click', function() {
 						infowindow.setContent(this.title);
 						infowindow.open(map, this);
 	}); 
+}
+//NOTE: this is from stackoverflow,http://stackoverflow.com/questions/14560999/using-the-haversine-formula-in-javascript, modified slightly
+function haversineDistance(lon1, lat1, lon2, lat2) {
+  function toRad(x) {
+    return x * Math.PI / 180;
+  }
 
-	return marker; 
+  var lon1 = coords1[0];
+  var lat1 = coords1[1];
 
+  var lon2 = coords2[0];
+  var lat2 = coords2[1];
+
+  var R = 6371; // km
+
+  var x1 = lat2 - lat1;
+  var dLat = toRad(x1);
+  var x2 = lon2 - lon1;
+  var dLon = toRad(x2)
+  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  var d = R * c;
+
+  d /= 1.60934;
+
+  return d;
 }
 
 </script>
