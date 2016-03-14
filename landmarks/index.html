@@ -24,13 +24,13 @@ var myOptions = {
 						center: me,
 						mapTypeId: google.maps.MapTypeId.ROADMAP
 					};
-var marker;
+
 var infowindow = new google.maps.InfoWindow();
 
 function initMap(){
         map = new google.maps.Map(document.getElementById("map"), myOptions); 
         getLocation();
-      }
+}
 
 
 function getLocation(){
@@ -66,50 +66,67 @@ function sendLocation(){
 	 		if (myRequest.readyState == 4 && myRequest.status == 200) {
 
 	 			//check if the data is bad
-	 			result=""; 
 	 			raw = myRequest.responseText;
 	 			theData = JSON.parse(raw);
-	 			//elem = document.getElementById("messages");
-	 			//elem.innerHTML = theData; 
 	 			console.log(theData); 
 
 
-	 			console.log(theData.people.length); 
 				for(i=0; i<theData.people.length; i++){
 					console.log("looping"); 
-					console.log("testing data array");
-					 longin = theData.people[i].login; 
-					 LatLng = {lat: theData.people[i].lat, lng: theData.people[i].lng};
+					login = theData.people[i].login; 
+					LatLng = {lat: theData.people[i].lat, lng: theData.people[i].lng};
 			
 
-					 var marker = new google.maps.Marker({
-						position: LatLng,
-						title: "Here I Am!"
-					});
-					
-					marker.setMap(map);
-									
-								/* // Open info window on click of marker
-								google.maps.event.addListener(marker, 'click', function() {
-									infowindow.setContent(marker.title);
-									infowindow.open(map, marker);
-								});
-					 			} */ 
+					var m = makeMarker(login, LatLng); 
+					console.log(m);
+	 			}  
 
-	 			}
+
+				for(i=0; i<theData.landmarks.length; i++){
+					var LatLng2 = {lat: theData.landmarks[i].geometry.coordinates[1],
+						lng: theData.landmarks[i].geometry.coordinates[0]};
+					console.log(LatLng2); 
+
+					var title= theData.landmarks[i].properties.Location_Name; 
+					console.log(title); 
+
+					var m = makeMarker(title, LatLng2); 
+					console.log(m); 
+
+					/*
+					marker = new google.maps.Marker({
+						position: LatLng2,
+						title: title
+					});
+
+
+					marker.setMap(map);
+
+					console.log("looping complete"); 
+
+					// Open info window on click of marker
+					google.maps.event.addListener(marker, 'click', function() {
+						infowindow.setContent(this.title);
+						infowindow.open(map, this);
+					}); */ 
+				} 
+
+
 	 	}
 
 	 	
 	}
 
 	myRequest.send("login=ELMER_MADDEN&lat="+myLat+"&lng="+myLng); 
-	 console.log("theoretically, you sent your location!");  
+	console.log("theoretically, you sent your location!");  
 }
 
 function renderMap(){
 		me = new google.maps.LatLng(myLat, myLng);
 		map.panTo(me);
-        marker = new google.maps.Marker({
+
+		makeMarker("Here I Am!", me); 
+        /*marker = new google.maps.Marker({
 					position: me,
 					title: "Here I Am!"
 				});
@@ -120,8 +137,25 @@ function renderMap(){
 				google.maps.event.addListener(marker, 'click', function() {
 					infowindow.setContent(marker.title);
 					infowindow.open(map, marker);
-				});
+				});*/ 
 				sendLocation(); 
+}
+
+function makeMarker(title, LatLng){
+	var marker = new google.maps.Marker({
+			position: LatLng,
+			title: title
+	});
+
+	marker.setMap(map);
+
+	google.maps.event.addListener(marker, 'click', function() {
+						infowindow.setContent(this.title);
+						infowindow.open(map, this);
+	}); 
+
+	return marker; 
+
 }
 
 </script>
