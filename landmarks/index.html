@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!ISSUES: line to marker, render map order !>
+<!ISSUES: reorganize, render map order !>
 
 <head>
   <meta charset="utf-8">
@@ -29,48 +29,44 @@ var infowindow = new google.maps.InfoWindow({
 });
 
 function initMap(){
-        map = new google.maps.Map(document.getElementById("map"), myOptions); 
-        getLocation();
+    map = new google.maps.Map(document.getElementById("map"), myOptions); 
+    getLocation();
 }
 
-
+//gets your coordinates 
 function getLocation(){
-	//console.log("test!"); 
-
-	if (navigator.geolocation) { // the navigator.geolocation object is supported on your browser
-					//get location and pass it to a function? 
-					navigator.geolocation.getCurrentPosition(function(position) {
-						myLat = position.coords.latitude;
-						myLng = position.coords.longitude;
-						//for testing purposes output it
-						renderMap(); 
-					});
-				}
-				else {
-					alert("Geolocation is not supported by your web browser.  What a shame!");
-				}
+	// make sure the browser supports this
+	if (navigator.geolocation) { 
+		navigator.geolocation.getCurrentPosition(function(position) {
+			myLat = position.coords.latitude;
+			myLng = position.coords.longitude;
+			renderMap(); 
+		});
+	}
+	else {
+		alert("Geolocation is not supported by your web browser.  What a shame!");
+	}
 }
-
-
+//Render the map using google API
+function renderMap(){
+		me = new google.maps.LatLng(myLat, myLng);
+		map.panTo(me);
+		makeMarker("Here I Am!", me, "me"); 
+		sendLocation(); 
+}
+//send your location and get back data from the server
 function sendLocation(){
-
-
+	//make an XMLHttp request to Ming's server
 	var myRequest = new XMLHttpRequest();
 	 	myRequest.open("Post", "https://defense-in-derpth.herokuapp.com/sendLocation", true);
 	 	myRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded"); 
-	 	//convention on assignment sheet
-
-
 		myRequest.onreadystatechange = function (){
 
 	 		//data must be ready 
 	 		if (myRequest.readyState == 4 && myRequest.status == 200) {
-
 	 			//check if the data is bad
 	 			raw = myRequest.responseText;
 	 			theData = JSON.parse(raw);
-	 			console.log(theData); 
-
 
 				for(i=0; i<theData.people.length; i++){
 					//console.log("looping"); 
@@ -147,13 +143,6 @@ function sendLocation(){
 	console.log("theoretically, you sent your location!");  
 }
 
-function renderMap(){
-		me = new google.maps.LatLng(myLat, myLng);
-		map.panTo(me);
-
-		makeMarker("Here I Am!", me, "me"); 
-		sendLocation(); 
-}
 
 function makeMarker(title, LatLng, key){
 
