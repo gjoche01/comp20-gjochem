@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!ISSUES: reorganize, render map order !>
+<!ISSUES: reorganize, render map order, rounding miles dist!>
 
 <head>
   <meta charset="utf-8">
@@ -11,31 +11,32 @@
 
 <body onload="initMap()">
 <div id="map"> MAP </div>
-
 <script>
 
+//Declaring some global variables 
 var myLat = 0;
 var myLng = 0;
 var me = new google.maps.LatLng(myLat, myLng);
 var map; 
-var myOptions = {
-						zoom: 13, // The larger the zoom number, the bigger the zoom
-						center: me,
-						mapTypeId: google.maps.MapTypeId.ROADMAP
-					};
 var contentString= ""; 
 var infowindow = new google.maps.InfoWindow({
 	content: contentString
 });
-var theData; 
+//hard coding in lat and lng as Tufts, because that's our focus in the project
+var myOptions = {
+	zoom: 14, 
+	center: {lat: 42.4069, lng: 71.1198},
+	mapTypeId: google.maps.MapTypeId.ROADMAP
+};
 
+//Initalize the map on the page
 function initMap(){
     map = new google.maps.Map(document.getElementById("map"), myOptions); 
-    getLocation();
+    getYourLocation();
 }
 
-//gets your coordinates 
-function getLocation(){
+//Determines your coordinates 
+function getYourLocation(){
 	// make sure the browser supports this
 	if (navigator.geolocation) { 
 		navigator.geolocation.getCurrentPosition(function(position) {
@@ -48,14 +49,16 @@ function getLocation(){
 		alert("Geolocation is not supported by your web browser.  What a shame!");
 	}
 }
-//Render the map using google API
+
+//Render the map using Google API
 function renderMap(){
 		me = new google.maps.LatLng(myLat, myLng);
 		map.panTo(me);
 		makeMarker("Here I Am!", me, "me"); 
 		sendLocation(); 
 }
-//send your location and get back data from the server
+
+//Send your location and get back data from the server
 function sendLocation(){
 	//make an XMLHttp request to Ming's server
 	var myRequest = new XMLHttpRequest();
@@ -63,68 +66,74 @@ function sendLocation(){
 	 	myRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded"); 
 		myRequest.onreadystatechange = function (){
 
-	 	//Check that data is ready
 	 	if (myRequest.readyState == 4 && myRequest.status == 200) {
-	 		//check if the data is bad
 	 		raw = myRequest.responseText;
 	 		theData = JSON.parse(raw);	
-	 		getPeople(theData); 	
-	 		getLandmarks(theData); 
-	 		var closestLandmark = findClosestLandmark(theData); 
-	 		drawPolyline(closestLandmark, theData); 
+	 		//Use data to put coords on map
+	 		setPeople(theData); 	
+	 		setLandmarks(theData); 
+	 		var closestLandmarkIndex = findClosestLandmark(theData); 
+	 		//draw line between closest landmark and me
+	 		drawPolyline(closestLandmarkIndex, theData); 
 	 	}	
 	}
 	myRequest.send("login=ELMER_MADDEN&lat="+myLat+"&lng="+myLng); 
 }
-
-function getPeople(theData) {
+//Set the people in the map 
+function setPeople(theData) {
 	for(i=0; i<theData.people.length; i++){
-				
 		login = theData.people[i].login; 
 		LatLng = {lat: theData.people[i].lat, lng: theData.people[i].lng};
 		var distance = haversineDistance(myLng, myLat, theData.people[i].lng, theData.people[i].lat); 
-		login+=" Distance from me:"+distance; 
+		login+=" Distance from me: "+distance; 
 		if(theData.people[i].login!="ELMER_MADDEN"){
 			var m = makeMarker(login, LatLng); 
 		}
 	 }  
 }
 
-function getLandmarks(theData){
+//Put the landmarks on the map 
+function setLandmarks(theData){
 	for(i=0; i<theData.landmarks.length; i++) {
 		var LatLng2 = {lat: theData.landmarks[i].geometry.coordinates[1],
-					lng: theData.landmarks[i].geometry.coordinates[0]};
+					  lng: theData.landmarks[i].geometry.coordinates[0]};
 			var title= theData.landmarks[i].properties.Details;
+
 			//make a marker if the landmark is in a one mile radius 
 			var distance = haversineDistance(myLng, myLat, theData.landmarks[i].geometry.coordinates[0],
-					 theData.landmarks[i].geometry.coordinates[1]); 
+					       theData.landmarks[i].geometry.coordinates[1]); 
 			title+="Distance from me "+distance; 
+
 			if (distance <= 1.0)
 			{
 				var m = makeMarker(title, LatLng2, "landmark");  
 			}
 	} 
-
 }
+
+//Calculate where the closest landmark is
+//Return index in theData array 
 function findClosestLandmark(theData){
-	//index in data array that denotes closest landmark
-	var closeLandmark = 0; 
+	//Index in data array that denotes closest landmark
+	var closestLandmarkIndex = 0; 
 	var distance = haversineDistance(myLng, myLat, theData.landmarks[0].geometry.coordinates[0],
 					theData.landmarks[0].geometry.coordinates[1]); 
+	//iterate to find smallest distance
 	for(i=1; i<theData.landmarks.length; i++) {
 			newDistance = haversineDistance(myLng, myLat, theData.landmarks[i].geometry.coordinates[0],
 			theData.landmarks[i].geometry.coordinates[1]); 
 			if(newDistance < distance){
-				closeLandmark = i; 
+				closestLandmarkIndex = i; 
 			}
 	}
-	return closeLandmark; 
+	return closestLandmarkIndex; 
 }
 
-function drawPolyline(i, theData){
+//Draw line between you and another marker
+function drawPolyline(closestLandmarkIndex, theData){
 	var coordinates = [
-				    {lat: myLat, lng: myLng},
-				    {lat: theData.landmarks[i].geometry.coordinates[1], lng: theData.landmarks[i].geometry.coordinates[0]}
+		{lat: myLat, lng: myLng},
+		{lat: theData.landmarks[closestLandmarkIndex].geometry.coordinates[1], lng: theData.landmarks[closestLandmarkIndex].geometry.coordinates[0]}
  				 ];
 
 				var line = new google.maps.Polyline ({
@@ -135,11 +144,11 @@ function drawPolyline(i, theData){
 				    strokeWeight: 2
 				}); 
 				line.setMap(map); 
-	
 }
 
+//Make a marker
+//key is a string 
 function makeMarker(title, LatLng, key){
-
 	var image; 
 	if (key == "me"){
 		image = "icon1.png"; 
@@ -183,14 +192,11 @@ var R = 6371; // km
   return d;
 }
 
+//Convert from degress to radians
 function toRad(x) {
     return x * Math.PI / 180;
   }
 
 </script>
-
-
- 
 </body>
-
 </html>
