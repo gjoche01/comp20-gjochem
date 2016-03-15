@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<!ISSUES: me icon??, line to marker, render map order, image from folder,  clean up code!>
-<html>
+<!ISSUES: line to marker, render map order, image from folder,  
 
 <head>
   <meta charset="utf-8">
@@ -80,8 +79,9 @@ function sendLocation(){
 			
 					var distance = haversineDistance(myLng, myLat, theData.people[i].lng, theData.people[i].lat); 
 					login+=" Distance from me:"+distance; 
-					var m = makeMarker(login, LatLng); 
-					//console.log(m);
+					if(theData.people[i].login!="ELMER_MADDEN"){
+						var m = makeMarker(login, LatLng); 
+					}
 	 			}  
 
 
@@ -133,7 +133,7 @@ function sendLocation(){
 				var line = new google.maps.Polyline ({
 					path: coordinates,
    					geodesic: true,
-				    strokeColor: '#FF0000',
+				    strokeColor: 'blue',
 				    strokeOpacity: 1.0,
 				    strokeWeight: 2
 				}); 
@@ -159,10 +159,10 @@ function makeMarker(title, LatLng, key){
 
 	var image; 
 	if (key == "me"){
-		image = "http://ruralshores.com/assets/marker-icon.png"; 
+		image = "icon1.png"; 
 	}
 	if (key == "landmark"){
-		image = "http://megaicons.net/static/img/icons_sizes/8/178/32/maps-and-geolocation-marker-icon.png"; 
+		image = "icon2.png"; 
 	}
 
 	var marker = new google.maps.Marker({
