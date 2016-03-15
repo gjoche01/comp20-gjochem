@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!ISSUES: me icon??, line to marker, render map order, clean up code!>
+<!ISSUES: me icon??, line to marker, render map order, image from folder,  clean up code!>
 <html>
 
 <head>
@@ -24,8 +24,10 @@ var myOptions = {
 						center: me,
 						mapTypeId: google.maps.MapTypeId.ROADMAP
 					};
-
-var infowindow = new google.maps.InfoWindow();
+var contentString= ""; 
+var infowindow = new google.maps.InfoWindow({
+	content: contentString
+});
 
 function initMap(){
         map = new google.maps.Map(document.getElementById("map"), myOptions); 
@@ -77,53 +79,65 @@ function sendLocation(){
 					LatLng = {lat: theData.people[i].lat, lng: theData.people[i].lng};
 			
 					var distance = haversineDistance(myLng, myLat, theData.people[i].lng, theData.people[i].lat); 
-					login+=" Distance:"+distance; 
+					login+=" Distance from me:"+distance; 
 					var m = makeMarker(login, LatLng); 
 					//console.log(m);
 	 			}  
 
 
-				for(i=0; i<theData.landmarks.length; i++){
+
+				for(i=0; i<theData.landmarks.length; i++) {
 					var LatLng2 = {lat: theData.landmarks[i].geometry.coordinates[1],
 						lng: theData.landmarks[i].geometry.coordinates[0]};
 					//console.log(LatLng2); 
 
-					var title= theData.landmarks[i].properties.Location_Name; 
-					//console.log(title); 
+					var title= theData.landmarks[i].properties.Details;
+
+					console.log(title); 
 
 
 					//make a marker if the landmark is in a one mile radius 
 					var distance = haversineDistance(myLng, myLat, theData.landmarks[i].geometry.coordinates[0],
 					 theData.landmarks[i].geometry.coordinates[1]); 
-					title+=distance; 
+
+					title+="Distance from me "+distance; 
 					if (distance <= 1.0)
 					{
 							console.log(distance); 
 							var m = makeMarker(title, LatLng2, "landmark");  
 					}
-				
 
-					//console.log(m); 
-
-					/*
-					marker = new google.maps.Marker({
-						position: LatLng2,
-						title: title
-					});
-
-
-					marker.setMap(map);
-
-					console.log("looping complete"); 
-
-					// Open info window on click of marker
-					google.maps.event.addListener(marker, 'click', function() {
-						infowindow.setContent(this.title);
-						infowindow.open(map, this);
-					}); */ 
 				} 
+				//index in data array that denotes closest landmark
+				var closeLandmark = 0; 
+				var distance = haversineDistance(myLng, myLat, theData.landmarks[0].geometry.coordinates[0],
+					 theData.landmarks[0].geometry.coordinates[1]); 
 
+				for(i=1; i<theData.landmarks.length; i++) {
+					newDistance = haversineDistance(myLng, myLat, theData.landmarks[i].geometry.coordinates[0],
+					 theData.landmarks[i].geometry.coordinates[1]); 
 
+			
+
+					if(newDistance < distance){
+						closeLandmark = i; 
+					}
+
+				}
+				console.log(closeLandmark); 
+				var coordinates = [
+				    {lat: myLat, lng: myLng},
+				    {lat: theData.landmarks[closeLandmark].geometry.coordinates[1], lng: theData.landmarks[closeLandmark].geometry.coordinates[0]}
+ 				 ];
+
+				var line = new google.maps.Polyline ({
+					path: coordinates,
+   					geodesic: true,
+				    strokeColor: '#FF0000',
+				    strokeOpacity: 1.0,
+				    strokeWeight: 2
+				}); 
+				line.setMap(map); 
 	 	}
 
 	 	
@@ -138,19 +152,7 @@ function renderMap(){
 		map.panTo(me);
 
 		makeMarker("Here I Am!", me, "me"); 
-        /*marker = new google.maps.Marker({
-					position: me,
-					title: "Here I Am!"
-				});
-
-				marker.setMap(map);
-					
-				// Open info window on click of marker
-				google.maps.event.addListener(marker, 'click', function() {
-					infowindow.setContent(marker.title);
-					infowindow.open(map, marker);
-				});*/ 
-				sendLocation(); 
+		sendLocation(); 
 }
 
 function makeMarker(title, LatLng, key){
