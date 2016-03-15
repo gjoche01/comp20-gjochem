@@ -10,22 +10,22 @@
 </head>
 
 <body onload="initMap()">
-<div id="map"> MAP </div>
+<div id="map"> </div>
 <script>
 
 //Declaring some global variables 
-var myLat = 0;
-var myLng = 0;
+var myLat = 42.4069;
+var myLng = 71.1198;
 var me = new google.maps.LatLng(myLat, myLng);
 var map; 
 var contentString= ""; 
 var infowindow = new google.maps.InfoWindow({
 	content: contentString
 });
-//hard coding in lat and lng as Tufts, because that's our focus in the project
+//Hard coding in lat and lng as Tufts, because that's our focus in the project
 var myOptions = {
 	zoom: 14, 
-	center: {lat: 42.4069, lng: 71.1198},
+	center: me,
 	mapTypeId: google.maps.MapTypeId.ROADMAP
 };
 
@@ -79,13 +79,14 @@ function sendLocation(){
 	}
 	myRequest.send("login=ELMER_MADDEN&lat="+myLat+"&lng="+myLng); 
 }
+
 //Set the people in the map 
 function setPeople(theData) {
 	for(i=0; i<theData.people.length; i++){
 		login = theData.people[i].login; 
 		LatLng = {lat: theData.people[i].lat, lng: theData.people[i].lng};
 		var distance = haversineDistance(myLng, myLat, theData.people[i].lng, theData.people[i].lat); 
-		login+=" Distance from me: "+distance; 
+		login+=" Distance from me: "+distance + " miles"; 
 		if(theData.people[i].login!="ELMER_MADDEN"){
 			var m = makeMarker(login, LatLng); 
 		}
@@ -98,12 +99,10 @@ function setLandmarks(theData){
 		var LatLng2 = {lat: theData.landmarks[i].geometry.coordinates[1],
 					  lng: theData.landmarks[i].geometry.coordinates[0]};
 			var title= theData.landmarks[i].properties.Details;
-
 			//make a marker if the landmark is in a one mile radius 
 			var distance = haversineDistance(myLng, myLat, theData.landmarks[i].geometry.coordinates[0],
 					       theData.landmarks[i].geometry.coordinates[1]); 
-			title+="Distance from me "+distance; 
-
+			title+="Distance from me "+distance+" miles"; 
 			if (distance <= 1.0)
 			{
 				var m = makeMarker(title, LatLng2, "landmark");  
@@ -134,16 +133,16 @@ function drawPolyline(closestLandmarkIndex, theData){
 	var coordinates = [
 		{lat: myLat, lng: myLng},
 		{lat: theData.landmarks[closestLandmarkIndex].geometry.coordinates[1], lng: theData.landmarks[closestLandmarkIndex].geometry.coordinates[0]}
- 				 ];
+ 	];
 
-				var line = new google.maps.Polyline ({
-					path: coordinates,
-   					geodesic: true,
-				    strokeColor: 'blue',
-				    strokeOpacity: 1.0,
-				    strokeWeight: 2
-				}); 
-				line.setMap(map); 
+	var line = new google.maps.Polyline ({
+		path: coordinates,
+   		geodesic: true,
+		strokeColor: 'blue',
+		strokeOpacity: 1.0,
+		strokeWeight: 2
+	}); 
+	line.setMap(map); 
 }
 
 //Make a marker
@@ -189,7 +188,8 @@ var R = 6371; // km
   //convert to miles 
   d /= 1.60934;
 
-  return d;
+  //round to 2 decimal points 
+  return d.toFixed(2);
 }
 
 //Convert from degress to radians
