@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-
+<!ISSUES: me icon??, line to marker, render map order, clean up code!>
 <html>
 
 <head>
@@ -76,7 +76,8 @@ function sendLocation(){
 					login = theData.people[i].login; 
 					LatLng = {lat: theData.people[i].lat, lng: theData.people[i].lng};
 			
-
+					var distance = haversineDistance(myLng, myLat, theData.people[i].lng, theData.people[i].lat); 
+					login+=" Distance:"+distance; 
 					var m = makeMarker(login, LatLng); 
 					//console.log(m);
 	 			}  
@@ -90,7 +91,18 @@ function sendLocation(){
 					var title= theData.landmarks[i].properties.Location_Name; 
 					//console.log(title); 
 
-					var m = makeMarker(title, LatLng2, "landmark");  
+
+					//make a marker if the landmark is in a one mile radius 
+					var distance = haversineDistance(myLng, myLat, theData.landmarks[i].geometry.coordinates[0],
+					 theData.landmarks[i].geometry.coordinates[1]); 
+					title+=distance; 
+					if (distance <= 1.0)
+					{
+							console.log(distance); 
+							var m = makeMarker(title, LatLng2, "landmark");  
+					}
+				
+
 					//console.log(m); 
 
 					/*
@@ -165,32 +177,30 @@ function makeMarker(title, LatLng, key){
 }
 //NOTE: this is from stackoverflow,http://stackoverflow.com/questions/14560999/using-the-haversine-formula-in-javascript, modified slightly
 function haversineDistance(lon1, lat1, lon2, lat2) {
-  function toRad(x) {
-    return x * Math.PI / 180;
-  }
 
-  var lon1 = coords1[0];
-  var lat1 = coords1[1];
-
-  var lon2 = coords2[0];
-  var lat2 = coords2[1];
-
-  var R = 6371; // km
+var R = 6371; // km
 
   var x1 = lat2 - lat1;
   var dLat = toRad(x1);
+
   var x2 = lon2 - lon1;
-  var dLon = toRad(x2)
+  var dLon = toRad(x2); 
+
   var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   var d = R * c;
 
+  //convert to miles 
   d /= 1.60934;
 
   return d;
 }
+
+function toRad(x) {
+    return x * Math.PI / 180;
+  }
 
 </script>
 
