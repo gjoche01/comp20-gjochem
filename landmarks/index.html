@@ -27,6 +27,7 @@ var contentString= "";
 var infowindow = new google.maps.InfoWindow({
 	content: contentString
 });
+var theData; 
 
 function initMap(){
     map = new google.maps.Map(document.getElementById("map"), myOptions); 
@@ -62,68 +63,68 @@ function sendLocation(){
 	 	myRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded"); 
 		myRequest.onreadystatechange = function (){
 
-	 		//data must be ready 
-	 		if (myRequest.readyState == 4 && myRequest.status == 200) {
-	 			//check if the data is bad
-	 			raw = myRequest.responseText;
-	 			theData = JSON.parse(raw);
+	 	//Check that data is ready
+	 	if (myRequest.readyState == 4 && myRequest.status == 200) {
+	 		//check if the data is bad
+	 		raw = myRequest.responseText;
+	 		theData = JSON.parse(raw);	
+	 		getPeople(theData); 	
+	 		getLandmarks(theData); 
+	 		var closestLandmark = findClosestLandmark(theData); 
+	 		drawPolyline(closestLandmark, theData); 
+	 	}	
+	}
+	myRequest.send("login=ELMER_MADDEN&lat="+myLat+"&lng="+myLng); 
+}
 
-				for(i=0; i<theData.people.length; i++){
-					//console.log("looping"); 
-					login = theData.people[i].login; 
-					LatLng = {lat: theData.people[i].lat, lng: theData.people[i].lng};
-			
-					var distance = haversineDistance(myLng, myLat, theData.people[i].lng, theData.people[i].lat); 
-					login+=" Distance from me:"+distance; 
-					if(theData.people[i].login!="ELMER_MADDEN"){
-						var m = makeMarker(login, LatLng); 
-					}
-	 			}  
+function getPeople(theData) {
+	for(i=0; i<theData.people.length; i++){
+				
+		login = theData.people[i].login; 
+		LatLng = {lat: theData.people[i].lat, lng: theData.people[i].lng};
+		var distance = haversineDistance(myLng, myLat, theData.people[i].lng, theData.people[i].lat); 
+		login+=" Distance from me:"+distance; 
+		if(theData.people[i].login!="ELMER_MADDEN"){
+			var m = makeMarker(login, LatLng); 
+		}
+	 }  
+}
 
-
-
-				for(i=0; i<theData.landmarks.length; i++) {
-					var LatLng2 = {lat: theData.landmarks[i].geometry.coordinates[1],
-						lng: theData.landmarks[i].geometry.coordinates[0]};
-					//console.log(LatLng2); 
-
-					var title= theData.landmarks[i].properties.Details;
-
-					console.log(title); 
-
-
-					//make a marker if the landmark is in a one mile radius 
-					var distance = haversineDistance(myLng, myLat, theData.landmarks[i].geometry.coordinates[0],
+function getLandmarks(theData){
+	for(i=0; i<theData.landmarks.length; i++) {
+		var LatLng2 = {lat: theData.landmarks[i].geometry.coordinates[1],
+					lng: theData.landmarks[i].geometry.coordinates[0]};
+			var title= theData.landmarks[i].properties.Details;
+			//make a marker if the landmark is in a one mile radius 
+			var distance = haversineDistance(myLng, myLat, theData.landmarks[i].geometry.coordinates[0],
 					 theData.landmarks[i].geometry.coordinates[1]); 
+			title+="Distance from me "+distance; 
+			if (distance <= 1.0)
+			{
+				var m = makeMarker(title, LatLng2, "landmark");  
+			}
+	} 
 
-					title+="Distance from me "+distance; 
-					if (distance <= 1.0)
-					{
-							console.log(distance); 
-							var m = makeMarker(title, LatLng2, "landmark");  
-					}
+}
+function findClosestLandmark(theData){
+	//index in data array that denotes closest landmark
+	var closeLandmark = 0; 
+	var distance = haversineDistance(myLng, myLat, theData.landmarks[0].geometry.coordinates[0],
+					theData.landmarks[0].geometry.coordinates[1]); 
+	for(i=1; i<theData.landmarks.length; i++) {
+			newDistance = haversineDistance(myLng, myLat, theData.landmarks[i].geometry.coordinates[0],
+			theData.landmarks[i].geometry.coordinates[1]); 
+			if(newDistance < distance){
+				closeLandmark = i; 
+			}
+	}
+	return closeLandmark; 
+}
 
-				} 
-				//index in data array that denotes closest landmark
-				var closeLandmark = 0; 
-				var distance = haversineDistance(myLng, myLat, theData.landmarks[0].geometry.coordinates[0],
-					 theData.landmarks[0].geometry.coordinates[1]); 
-
-				for(i=1; i<theData.landmarks.length; i++) {
-					newDistance = haversineDistance(myLng, myLat, theData.landmarks[i].geometry.coordinates[0],
-					 theData.landmarks[i].geometry.coordinates[1]); 
-
-			
-
-					if(newDistance < distance){
-						closeLandmark = i; 
-					}
-
-				}
-				console.log(closeLandmark); 
-				var coordinates = [
+function drawPolyline(i, theData){
+	var coordinates = [
 				    {lat: myLat, lng: myLng},
-				    {lat: theData.landmarks[closeLandmark].geometry.coordinates[1], lng: theData.landmarks[closeLandmark].geometry.coordinates[0]}
+				    {lat: theData.landmarks[i].geometry.coordinates[1], lng: theData.landmarks[i].geometry.coordinates[0]}
  				 ];
 
 				var line = new google.maps.Polyline ({
@@ -134,15 +135,8 @@ function sendLocation(){
 				    strokeWeight: 2
 				}); 
 				line.setMap(map); 
-	 	}
-
-	 	
-	}
-
-	myRequest.send("login=ELMER_MADDEN&lat="+myLat+"&lng="+myLng); 
-	console.log("theoretically, you sent your location!");  
+	
 }
-
 
 function makeMarker(title, LatLng, key){
 
