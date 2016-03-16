@@ -54,7 +54,7 @@ function getYourLocation(){
 function renderMap(){
 		me = new google.maps.LatLng(myLat, myLng);
 		map.panTo(me);
-		makeMarker("Here I Am!", me, "me"); 
+		//makeMarker("Here I Am!", me, "me"); 
 		sendLocation(); 
 }
 
@@ -68,12 +68,20 @@ function sendLocation(){
 
 	 	if (myRequest.readyState == 4 && myRequest.status == 200) {
 	 		raw = myRequest.responseText;
-	 		theData = JSON.parse(raw);	
+	 		theData = JSON.parse(raw);
+
 	 		//Use data to put coords on map
 	 		setPeople(theData); 	
-	 		setLandmarks(theData); 
+	 		setLandmarks(theData);
 	 		var closestLandmarkIndex = findClosestLandmark(theData); 
-	 		//draw line between closest landmark and me
+
+	 		//calculate distance between me and closest landmark 
+	 		dist = haversineDistance (myLng, myLat, theData.landmarks[closestLandmarkIndex].geometry.coordinates[0],
+					       theData.landmarks[closestLandmarkIndex].geometry.coordinates[1]); 
+	 		//make special title for my marker
+	 		var title = "Here I am! The closeset landmark is: "+ theData.landmarks[closestLandmarkIndex].properties.Location_Name+" It is "+dist+ " miles away"; 
+	 		makeMarker(title, me, "me"); 
+
 	 		drawPolyline(closestLandmarkIndex, theData); 
 	 	}	
 	}
@@ -125,6 +133,7 @@ function findClosestLandmark(theData){
 				closestLandmarkIndex = i; 
 			}
 	}
+
 	return closestLandmarkIndex; 
 }
 
@@ -146,7 +155,7 @@ function drawPolyline(closestLandmarkIndex, theData){
 }
 
 //Make a marker
-//key is a string 
+//key is a string to tell what type of marker to use
 function makeMarker(title, LatLng, key){
 	var image; 
 	if (key == "me"){
