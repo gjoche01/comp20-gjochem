@@ -14,16 +14,11 @@
 	  		$(document).keypress(function(e) {
 			    if(e.which == 13) {
 			        var value = $("#msg").val();
+			        
+			        //value = value + " " + today; 
 			        //console.log(value); 
-			        //var today = new Date();
-			        var unixTimestamp = Date.now();
-			        console.log(unixTimestamp); 
 
-			       // var test = Date.prototype.getDay();  
-			       // console.log(test); 
-			       // $('log').data(value, x);
-
-			        $("div").html(value); 
+			        //$("div").html(value); 
 			        reload(); 
 			    }
 			});
@@ -40,10 +35,16 @@
 	   }
 
 	   function reload(){
-			elem = document.getElementById("log");
+
+	   	/*var unixTimestamp = Date.now();
+		today = new Date (unixTimestamp); 
+		console.log(unixTimestamp); */ 
+
 			output = "";
 			for (key in localStorage) {
-				output = "<p>" + localStorage[key] + "</p>\n"+output;
+				today = new Date (parseInt(key));
+				today.toUTCString()
+				output = "<p>" + localStorage[key] + today + "</p>\n"+output; 
 			}
 			$("div").html(output); 
 	   }
