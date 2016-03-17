@@ -44,7 +44,7 @@
 			for (key in localStorage) {
 				today = new Date (parseInt(key));
 				today.toUTCString()
-				output = "<p>" + localStorage[key] + today + "</p>\n"+output; 
+				output = "<p>" + today+ " - "+ localStorage[key] + "</p>\n"+output; 
 			}
 			$("div").html(output); 
 	   }
