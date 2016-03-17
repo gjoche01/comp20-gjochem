@@ -14,11 +14,6 @@
 	  		$(document).keypress(function(e) {
 			    if(e.which == 13) {
 			        var value = $("#msg").val();
-			        
-			        //value = value + " " + today; 
-			        //console.log(value); 
-
-			        //$("div").html(value); 
 			        reload(); 
 			    }
 			});
@@ -35,11 +30,6 @@
 	   }
 
 	   function reload(){
-
-	   	/*var unixTimestamp = Date.now();
-		today = new Date (unixTimestamp); 
-		console.log(unixTimestamp); */ 
-
 			output = "";
 			for (key in localStorage) {
 				today = new Date (parseInt(key));
