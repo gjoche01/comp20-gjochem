@@ -10,15 +10,14 @@
 	   		reload(); 
 	  		$(document).keypress(function(e) {
 			    if(e.which == 13) {
-			        var value = $("#msg").val();
-			        //reload(); 
+			        var value = $("#msg").val();		       
 			    }
 			});
  		});
 
 	 	$(document).change(function(){
 	   		store(); 
-	   }); 
+	    }); 
 
 	   function store(){
 		   	txt = document.getElementById("msg").value;
@@ -38,10 +37,11 @@
 
 </script>
 </head>
-
 <body>
+
 	<h1>Captain's Log</h1>
 	<h3>New entry: <input type="text" id="msg" name="msg" size="30" /></h3>
 	<div id="log"></div>
+
 </body>
 </html>
