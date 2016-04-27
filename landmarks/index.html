@@ -62,7 +62,7 @@ function renderMap(){
 function sendLocation(){
 	//make an XMLHttp request to Ming's server
 	var myRequest = new XMLHttpRequest();
-	 	myRequest.open("Post", "https://still-crag-58004.herokuapp.com/sendLocation", true);
+	 	myRequest.open("Post", "http://localhost:8000/sendLocation", true);
 	 	myRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded"); 
 		myRequest.onreadystatechange = function (){
 
@@ -115,6 +115,7 @@ function setLandmarks(theData){
 			{
 				var m = makeMarker(title, LatLng2, "landmark");  
 			}
+		
 	} 
 }
 
